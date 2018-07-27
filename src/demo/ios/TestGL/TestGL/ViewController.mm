@@ -18,9 +18,8 @@ CartoTypeFramework* m_framework;
 int m_ui_scale;
 CartoTypePoint m_route_start;
 CartoTypePoint m_route_end;
-CartoTypeRoute* m_route;
-std::vector<CartoTypePoint> m_route_points;
 CGPoint m_current_point;
+UISearchBar* m_search_bar;
 }
 
 -(id)initWithFramework:(CartoTypeFramework*)aFramework
@@ -58,9 +57,43 @@ CGPoint m_current_point;
     [self.view addGestureRecognizer:my_tap_recognizer];
     
     m_ui_scale = [[UIScreen mainScreen] scale];
-    m_route = nullptr;
     
     self.view.multipleTouchEnabled = YES;
+    
+    // Create a search bar.
+    m_search_bar = [[UISearchBar alloc] init];
+    m_search_bar.delegate = self;
+    m_search_bar.frame = CGRectMake(0, 0, 300, 40);
+    m_search_bar.layer.position = CGPointMake(self.view.bounds.size.width / 2,40);
+    
+    // add shadow
+    //mySearchBar.layer.shadowColor = UIColor.blackColor().CGColor
+    //mySearchBar.layer.shadowOpacity = 0.5
+    //mySearchBar.layer.masksToBounds = false
+    
+    // show cancel button
+    m_search_bar.showsCancelButton = true;
+    
+    // hide bookmark button
+    //mySearchBar.showsBookmarkButton = false
+    
+    // set Default bar status.
+    //mySearchBar.searchBarStyle = UISearchBarStyle.Default
+    
+    // set title
+    //mySearchBar.prompt = "Title"
+    
+    // set placeholder
+    m_search_bar.placeholder = @"place name";
+    
+    // change the color of cursol and cancel button.
+    //mySearchBar.tintColor = UIColor.redColor()
+    
+    // hide the search result.
+    //mySearchBar.showsSearchResultsButton = false
+    
+    // add searchBar to the view.
+    [self.view addSubview:m_search_bar];
     }
 
 -(IBAction)handlePanGesture:(UIPanGestureRecognizer*)aRecognizer
@@ -139,6 +172,41 @@ CGPoint m_current_point;
 -(BOOL)gestureRecognizer:(UIGestureRecognizer*)aR1 shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)aR2
     {
     return YES;
+    }
+
+// Prevent the search bar from getting touch events so that tapping in it doesn't change the route.
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)aTouch
+    {
+    if ([aTouch.view isDescendantOfView:m_search_bar])
+        return NO;
+    return YES;
+    }
+
+-(void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)aSearchText
+    {
+    }
+
+-(void)searchBarCancelButtonClicked:(UISearchBar *)aSearchBar
+    {
+    [self.view endEditing:YES];
+    }
+
+-(void)searchBarSearchButtonClicked:(UISearchBar *)aSearchBar
+    {
+    [self.view endEditing:YES];
+    NSString* text = [aSearchBar text];
+    if (text)
+        {
+        NSMutableArray* found = [[NSMutableArray alloc] init];
+        CartoTypeFindParam* param = [[CartoTypeFindParam alloc] init];
+        param.text = text;
+        [m_framework find:found withParam:param];
+        if ([found count] > 0)
+            {
+            CartoTypeMapObject* object = [found firstObject];
+            [m_framework setViewObject:object margin:16 minScale:10000];
+            }
+        }
     }
 
 @end

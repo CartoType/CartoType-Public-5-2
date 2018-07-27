@@ -9,7 +9,7 @@
 #import <GLKit/GLKit.h>
 #import "CartoTypeMapView.h"
 
-@interface ViewController : GLKViewController <UIGestureRecognizerDelegate>
+@interface ViewController : GLKViewController <UIGestureRecognizerDelegate, UISearchBarDelegate>
 
 -(id)initWithFramework:(CartoTypeFramework*)aFramework;
 

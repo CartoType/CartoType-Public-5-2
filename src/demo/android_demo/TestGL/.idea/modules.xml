@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/TestGL.iml" filepath="$PROJECT_DIR$/TestGL.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/cartotype-release/cartotype-release.iml" filepath="$PROJECT_DIR$/cartotype-release/cartotype-release.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cartotype/cartotype.iml" filepath="$PROJECT_DIR$/cartotype/cartotype.iml" />
     </modules>
   </component>
 </project>

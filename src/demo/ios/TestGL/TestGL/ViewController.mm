@@ -20,6 +20,7 @@ CartoTypePoint m_route_start;
 CartoTypePoint m_route_end;
 CGPoint m_current_point;
 UISearchBar* m_search_bar;
+uint64_t m_pushpin_id;
 }
 
 -(id)initWithFramework:(CartoTypeFramework*)aFramework
@@ -35,6 +36,8 @@ UISearchBar* m_search_bar;
 -(void)viewDidLoad
     {
     [super viewDidLoad];
+    
+    [self becomeFirstResponder];
 
     // Create a pan gesture recognizer.
     UIPanGestureRecognizer* my_pan_recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
@@ -55,6 +58,11 @@ UISearchBar* m_search_bar;
     UITapGestureRecognizer* my_tap_recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
     my_tap_recognizer.delegate = self;
     [self.view addGestureRecognizer:my_tap_recognizer];
+    
+    // Create a long-press gesture recogniser.
+    UILongPressGestureRecognizer* my_long_press_recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
+    my_long_press_recognizer.delegate = self;
+    [self.view addGestureRecognizer:my_long_press_recognizer];
     
     m_ui_scale = [[UIScreen mainScreen] scale];
     
@@ -149,18 +157,105 @@ UISearchBar* m_search_bar;
     {
     if ([aRecognizer state] == UIGestureRecognizerStateRecognized)
         {
-        // hack: toggle perspective
-        //[m_framework setPerspective:![m_framework getPerspective]];
+        // toggle perspective
+        // [m_framework setPerspective:![m_framework getPerspective]];
+        }
+    }
 
-        // Create a route between the last two points tapped.
+-(IBAction)handleLongPressGesture:(UILongPressGestureRecognizer*)aRecognizer
+    {
+    if ([aRecognizer state] == UIGestureRecognizerStateRecognized)
+        {
         auto p = [aRecognizer locationInView:nullptr];
         m_route_start = m_route_end;
         m_route_end.x = p.x * m_ui_scale;
         m_route_end.y = p.y * m_ui_scale;
         [m_framework convertPoint:&m_route_end from:DisplayCoordType to:MapCoordType];
+        
+        // Find nearby objects.
+        NSMutableArray* object_array = [[NSMutableArray alloc] init];
+        double pixel_mm = [m_framework getResolutionDpi] / 25.4;
+        CartoTypePoint pp;
+        pp.x = p.x * m_ui_scale;
+        pp.y = p.y * m_ui_scale;
+        [m_framework findInDisplay:object_array maxItems:10 point:pp radius:ceil(2 * pixel_mm)];
+        
+        // See if we have a pushpin.
+        m_pushpin_id = 0;
+        for (int i = 0; i < [object_array count]; i++)
+            {
+            CartoTypeMapObject* cur_object = (CartoTypeMapObject*)[object_array objectAtIndex:i];
+            if ([[cur_object getLayerName]  isEqual: @"pushpin"])
+                {
+                m_pushpin_id = [cur_object getObjectId];
+                break;
+                }
+            }
+
+        // Create the menu.
+        UIMenuController* menu = [UIMenuController sharedMenuController];
+        
+        UIMenuItem* pushpin_menu_item;
+        if (m_pushpin_id)
+            pushpin_menu_item = [[UIMenuItem alloc] initWithTitle:@"Delete pushpin" action:@selector(deletePushPin)];
+        else
+            pushpin_menu_item = [[UIMenuItem alloc] initWithTitle:@"Insert pushpin" action:@selector(insertPushPin)];
+        
         if (m_route_start.x && m_route_start.y)
-            [m_framework startNavigationFrom:m_route_start startCoordType:MapCoordType to:m_route_end endCoordType:MapCoordType];
+            {
+            menu.menuItems =
+                @[
+                 pushpin_menu_item,
+                 [[UIMenuItem alloc] initWithTitle:@"Route to here" action:@selector(routeFromStartToEnd)],
+                 [[UIMenuItem alloc] initWithTitle:@"Route from here" action:@selector(routeFromEndToStart)]
+                 ];
+            }
+        else
+            {
+            menu.menuItems =
+                @[
+                 pushpin_menu_item
+                 ];
+            }
+        
+
+        CGRect target = CGRectMake(p.x,p.y,1,1);
+        [menu setTargetRect:target inView:self.view];
+        [menu setMenuVisible:YES animated:YES];
         }
+    }
+
+-(BOOL)canBecomeFirstResponder
+    {
+    return YES;
+    }
+
+-(void)routeFromStartToEnd
+    {
+    [m_framework startNavigationFrom:m_route_start startCoordType:MapCoordType to:m_route_end endCoordType:MapCoordType];
+    }
+
+-(void)routeFromEndToStart
+    {
+    std::swap(m_route_start,m_route_end);
+    [m_framework startNavigationFrom:m_route_start startCoordType:MapCoordType to:m_route_end endCoordType:MapCoordType];
+    }
+
+-(void)insertPushPin
+    {
+    CartoTypeAddress* a = [[CartoTypeAddress alloc] init];
+    [m_framework getAddress:a point:m_route_end coordType:MapCoordType];
+    CartoTypeMapObjectParam* p = [[CartoTypeMapObjectParam alloc] initWithType:PointMapObjectType andLayer:@"pushpin" andCoordType:MapCoordType];
+    [p appendX:m_route_end.x andY:m_route_end.y];
+    p.mapHandle = 0;
+    p.stringAttrib = [a ToString:false];
+    [m_framework insertMapObject:p];
+    }
+
+-(void)deletePushPin
+    {
+    [m_framework deleteObjectsFromMap:0 fromID:m_pushpin_id toID:m_pushpin_id withCondition:nullptr andCount:nullptr];
+    m_pushpin_id = 0;
     }
 
 -(void)didReceiveMemoryWarning

@@ -658,6 +658,7 @@ class CGeometry
     explicit CGeometry(const CMapObject& aMapObject);
     CGeometry(const MPath& aPath,TCoordType aCoordType,bool aClosed);
     CGeometry(const TRectFP& aRect,TCoordType aCoordType);
+    CGeometry(const TPointFP& aPoint,TCoordType aCoordType);
     void Clear() { iPoint.clear(); iContourStart.clear(); iCoordType = TCoordType::Map; iClosed = false; }
 
     TCoordType CoordType() const { return iCoordType; }

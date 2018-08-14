@@ -362,6 +362,8 @@ class CLabelSet
 class CPositionedLabel
     {
     public:
+    /** The label layer. */
+    uint32 m_layer = 0;
     /** A bitmap containing the label. */
     CBitmap m_bitmap;
     /** The top left of the bitmap in pixels. */

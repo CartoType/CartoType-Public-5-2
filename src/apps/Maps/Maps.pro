@@ -133,16 +133,10 @@ ICON = CartoTypeMacMaps.icns
 QT += printsupport
 QT += gui
 
-win32:contains(QMAKE_TARGET.arch, x86_64):
+win32:
 {
-CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../bin/14.0/x64/DebugNoGL/ -lcartotype -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build64/debug -lCartoTypeQtMapRenderer
-else:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../bin/14.0/x64/ReleaseNoGL/ -lcartotype -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build64/release -lCartoTypeQtMapRenderer
-}
-
-win32:!contains(QMAKE_TARGET.arch, x86_64):
-{
-CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../bin/14.0/Win32/DebugNoGL/ -lcartotype -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build32/debug -lCartoTypeQtMapRenderer
-else:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../bin/14.0/Win32/ReleaseNoGL/ -lcartotype -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build32/release -lCartoTypeQtMapRenderer
+CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../bin/15.0/x64/DebugDLL/ -lcartotype -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build64/debug -lCartoTypeQtMapRenderer
+else:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../bin/15.0/x64/ReleaseDLL/ -lcartotype -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build64/release -lCartoTypeQtMapRenderer
 }
 
 unix:!macx: LIBS += -L$$PWD/../../main/platform/qt/CartoTypeQtMapRenderer/build64/release/ -lCartoTypeQtMapRenderer -L$$PWD/../../main/single_library/unix/bin/ReleaseLicensed/ -lcartotype

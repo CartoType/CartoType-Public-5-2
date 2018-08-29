@@ -910,13 +910,13 @@ void MapForm::Find()
     m_found_object_index = 0;
     while (find_dialog.exec() == QDialog::DialogCode::Accepted)
         {
-        m_find_text.Set(find_dialog.m_ui->findText->text().utf16());
+        m_find_text.Set(find_dialog.Match().m_value);
         m_find_text_prefix = find_dialog.m_ui->prefix->isChecked();
         m_find_text_fuzzy = find_dialog.m_ui->fuzzyMatch->isChecked();
         if (m_find_text.Length() == 0)
             continue;
 
-        m_found_object = find_dialog.Find(true);
+        m_found_object = find_dialog.Find();
         if (m_found_object.size() == 0)
             {
             std::string s("Text ");

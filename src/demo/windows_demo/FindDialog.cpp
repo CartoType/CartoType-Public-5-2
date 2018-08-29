@@ -15,11 +15,10 @@ CFindTextDialog::CFindTextDialog(CartoType::CFramework& aFramework,const CartoTy
 CDialog(CFindTextDialog::IDD,pParent),
 iPrefix(aPrefix),
 iFuzzy(aFuzzy),
-iFramework(aFramework),
-iSelectedObjectIndex(-1)
+iFramework(aFramework)
     {
     SetString(iFindText,aText);
-    iFindParam.iMaxObjectCount = 32;
+    iFindParam.iMaxObjectCount = 64;
     iFindParam.iAttributes = "$,name:*,ref,alt_name,int_name,addr:housename";
     iFindParam.iCondition = "OsmType!='bsp'"; // exclude bus stops
     iFindParam.iStringMatchMethod = CartoType::TStringMatchMethod(CartoType::TStringMatchMethodFlag::Prefix |
@@ -27,6 +26,9 @@ iSelectedObjectIndex(-1)
                                                                   CartoType::TStringMatchMethodFlag::FoldCase |
                                                                   CartoType::TStringMatchMethodFlag::IgnoreNonAlphanumerics |
                                                                   CartoType::TStringMatchMethodFlag::Fast);
+    CartoType::TRectFP view;
+    iFramework.GetView(view,CartoType::TCoordType::Map);
+    iFindParam.iLocation = CartoType::CGeometry(view,CartoType::TCoordType::Map);
     }
 
 void CFindTextDialog::DoDataExchange(CDataExchange* pDX)
@@ -42,7 +44,7 @@ void CFindTextDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CFindTextDialog,CDialog)
     ON_CBN_EDITCHANGE(IDC_FIND_TEXT,OnEditChange)
     ON_CBN_DBLCLK(IDC_FIND_TEXT,OnComboBoxDoubleClick)
-    ON_BN_CLICKED(IDC_GEOCODE,OnGeocode)
+    ON_CBN_SELCHANGE(IDC_FIND_TEXT,OnComboBoxSelChange)
 END_MESSAGE_MAP()
 
 BOOL CFindTextDialog::OnInitDialog()
@@ -61,33 +63,13 @@ void CFindTextDialog::OnEditChange()
 
 void CFindTextDialog::OnComboBoxDoubleClick()
     {
-    CComboBox* cb = (CComboBox*)GetDlgItem(IDC_FIND_TEXT);
-    iSelectedObjectIndex = cb->GetCurSel();
-    if (iSelectedObjectIndex >= 0 && iSelectedObjectIndex < iObjectArray.size())
-        {
-        CString text;
-        cb->GetLBText(iSelectedObjectIndex,iFindText);
-        EndDialog(IDOK);
-        }
+    UpdateMatch();
+    EndDialog(IDOK);
     }
 
-void CFindTextDialog::OnGeocode()
+void CFindTextDialog::OnComboBoxSelChange()
     {
-    // Convert the combo box entries to addresses.
-    CComboBox* cb = (CComboBox*)GetDlgItem(IDC_FIND_TEXT);
-    for (int i = cb->GetCount(); i >= 0; i--)
-        cb->DeleteString(i);
-    CString text;
-    for (const auto& cur_object : iObjectArray)
-        {
-        CartoType::CString summary;
-        CartoType::TResult error = iFramework.GeoCodeSummary(summary,*cur_object);
-        if (!error)
-            {
-            SetString(text,summary);
-            cb->AddString(text);
-            }
-        }
+    UpdateMatch();
     }
 
 void CFindTextDialog::PopulateComboBox()
@@ -101,25 +83,58 @@ void CFindTextDialog::PopulateComboBox()
 
     CartoType::CString text;
     SetString(text,w_text);
+    iMatch.iValue = text;
+    iMatch.iKey.Clear();
 
-    // Find up to 32 items starting with the current text.
-    iObjectArray.clear();
+    // Find up to 64 items starting with the current text.
+    CartoType::CMapObjectArray object_array;
     iFindParam.iText = text;
-    iFramework.Find(iObjectArray,iFindParam);
+    iFramework.Find(object_array,iFindParam);
+
+    // Put them in an array of unique combinations of matched name and attribute.
+    iMatchArray.clear();
+    for (const auto& cur_object : object_array)
+        {
+        CartoType::CMapObject::CMatch match;
+        CartoType::TResult error = cur_object->GetMatch(match,text,iFindParam.iStringMatchMethod,&iFindParam.iAttributes);
+        if (!error)
+            iMatchArray.push_back({ match.iKey, match.iValue });
+        }
+    std::sort(iMatchArray.begin(),iMatchArray.end());
+    auto iter = std::unique(iMatchArray.begin(),iMatchArray.end());
+    iMatchArray.erase(iter,iMatchArray.end());
 
     // Put them in the combo box.
     for (int i = cb->GetCount(); i >= 0; i--)
         cb->DeleteString(i);
 
-    for (const auto& cur_object : iObjectArray)
+    for (const auto& cur_match : iMatchArray)
         {
-        CartoType::CMapObject::CMatch match;
-        CartoType::TResult error = cur_object->GetMatch(match,text,iFindParam.iStringMatchMethod,&iFindParam.iAttributes);
-        if (!error)
+        CartoType::CString label;
+        if (cur_match.iKey.Length())
             {
-            SetString(w_text,match.iValue);
-            cb->AddString(w_text);
+            label += "[";
+            label += cur_match.iKey;
+            label += "=";
+            label += cur_match.iValue;
+            label += "]";
             }
+        else
+            label = cur_match.iValue;
+        SetString(w_text,label);
+        cb->AddString(w_text);
+        }
+    }
+
+void CFindTextDialog::UpdateMatch()
+    {
+    CComboBox* cb = (CComboBox*)GetDlgItem(IDC_FIND_TEXT);
+    int index = cb->GetCurSel();
+    if (index >= 0 && index < iMatchArray.size())
+        {
+        CString text;
+        cb->GetLBText(index,iFindText);
+        iMatch = iMatchArray[index];
         }
     }
 

@@ -16,9 +16,21 @@ class FindDialog: public QDialog
     public:
     explicit FindDialog(QWidget* aParent,CartoType::CFramework& aFramework);
     ~FindDialog();
-    CartoType::CMapObjectArray Find(bool aAllAttributes);
+    CartoType::CMapObjectArray Find();
 
     Ui::FindDialog* m_ui;
+
+    class TMatch
+        {
+        public:
+        bool operator==(const TMatch& aOther) const { return m_key == aOther.m_key && m_value == aOther.m_value; }
+        bool operator<(const TMatch& aOther) const { return m_key < aOther.m_key || (m_key == aOther.m_key && m_value < aOther.m_value); }
+
+        CartoType::CString m_key;
+        CartoType::CString m_value;
+        };
+
+    const TMatch& Match() const { return m_match; }
 
     private slots:
     void on_findText_textChanged(const QString& aText);
@@ -26,10 +38,13 @@ class FindDialog: public QDialog
 
     private:
     void PopulateList(const QString& aText);
+    void UpdateMatch();
     bool eventFilter(QObject* aWatched,QEvent* aEvent) override;
 
     CartoType::CFramework& m_framework;
     CartoType::TFindParam m_find_param;
+    TMatch m_match;
+    std::vector<TMatch> m_match_array;
     int m_lock;
     };
 

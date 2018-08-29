@@ -1431,24 +1431,25 @@ void CCartoTypeDemoView::OnFind()
         {
         if (find_dialog.DoModal() == IDOK)
             {
-            find_dialog.iFindText.TrimLeft();
-            SetString(iFindText,find_dialog.iFindText);
+            iFindText = find_dialog.Match().iValue;
             iFindTextPrefix = find_dialog.iPrefix != 0;
             iFindTextFuzzy = find_dialog.iFuzzy != 0;
-            iFoundObject.clear();
-            auto selected_object = find_dialog.SelectedObject();
-            if (selected_object)
-                iFoundObject.push_back(std::move(selected_object));
-            else
+
+            if (iFindText.Length())
                 {
                 CWaitCursor cursor;
-                CartoType::TStringMatchMethod string_match_method = CartoType::TStringMatchMethod::Loose;
-                if (find_dialog.iPrefix)
-                    string_match_method = CartoType::TStringMatchMethod(uint32_t(string_match_method) | CartoType::TStringMatchMethodFlag::Prefix);
-                if (find_dialog.iFuzzy)
-                    string_match_method = CartoType::TStringMatchMethod(uint32_t(string_match_method) | CartoType::TStringMatchMethodFlag::Fuzzy);
 
-                CartoType::TResult error = iFramework->FindText(iFoundObject,30000,iFindText,string_match_method,"","");
+                iFoundObject.clear();
+                CartoType::TFindParam param = find_dialog.FindParam();
+                param.iStringMatchMethod = CartoType::TStringMatchMethod::Loose;
+                if (find_dialog.iPrefix)
+                    param.iStringMatchMethod = CartoType::TStringMatchMethod(uint32_t(param.iStringMatchMethod) | CartoType::TStringMatchMethodFlag::Prefix);
+                if (find_dialog.iFuzzy)
+                    param.iStringMatchMethod = CartoType::TStringMatchMethod(uint32_t(param.iStringMatchMethod) | CartoType::TStringMatchMethodFlag::Fuzzy);
+                param.iMaxObjectCount = 10000;
+                param.iText = iFindText;
+                param.iAttributes = find_dialog.Match().iKey;
+                CartoType::TResult error = iFramework->Find(iFoundObject,param);
                 }
 
             if (iFoundObject.size() == 0)
@@ -1465,14 +1466,17 @@ void CCartoTypeDemoView::OnFind()
                 iFoundObjectId = 0;
                 ShowNextFoundObject();
 
-                // Insert pushpins for found objects.
+                // Insert pushpins for first 10 found objects.
                 iFramework->DeleteMapObjects(0,0,UINT64_MAX,count,"@layer=='pushpin' and Type==3");
                 CartoType::CString layer("pushpin");
+                int n = 0;
                 for (const auto& p : iFoundObject)
                     {
                     auto centre = p->CenterOfGravity();
                     uint64_t id = 0;
                     iFramework->InsertPointMapObject(0,layer,centre.iX,centre.iY,CartoType::TCoordType::Map,"",3,id,false);
+                    if (++n == 10)
+                        break;
                     }
 
                 stop = true;

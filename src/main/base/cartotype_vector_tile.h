@@ -492,7 +492,7 @@ stored in graphics memory, and to draw the tile using that data.
 class CVectorTileServer: public MFrameworkObserver
     {
     public:
-    CVectorTileServer(CFramework& aFramework,std::shared_ptr<CVectorTileHelper> aHelper,size_t aThreadCount,size_t aMaxZoomLevel = 20,size_t aMaxTileCacheItems = 256);
+    CVectorTileServer(CFramework& aFramework,std::shared_ptr<CVectorTileHelper> aHelper,size_t aThreadCount,size_t aMaxZoomLevel = 32,size_t aMaxTileCacheItems = 256);
     ~CVectorTileServer();
 
     void Draw();

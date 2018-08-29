@@ -20,6 +20,8 @@ class TFindParam
     size_t iMaxObjectCount = SIZE_MAX;
     /** The clip path; no clipping is done if iClip is empty. */
     CGeometry iClip;
+    /** The current location. If it is non-empty, objects in or near this region are preferred. It may be a single point. */
+    CGeometry iLocation;
     /** A list of layer names separated by spaces or commas. If it is empty all layers are searched. Layer names may contain the wild cards * and ?. */
     CString iLayers;
     /**
@@ -43,6 +45,40 @@ class TFindParam
     CString iCondition;
     /** If iMerge is true (the default), adjoining objects with the same name and attributes may be merged into a single object. */
     bool iMerge = true;
+    };
+
+/** Types of place to search for in the 'find nearby' function. */
+enum class TPointOfInterestType
+    {
+    None,
+    Address,
+    Airport,
+    Bar,
+    Beach,
+    BusStation,
+    Cafe,
+    Camping,
+    FastFood,
+    GolfCourse,
+    Fuel,
+    Hotel,
+    Pharmacy,
+    Pub,
+    Restaurant,
+    Shops,
+    Supermarket,
+    Tourism,
+    TrainStation
+    };
+
+/** Parameters for the 'find nearby' function. */
+class TFindNearbyParam
+    {
+    public:
+    /** The type of place to search for. The value None causes iName to be analyzed to narrow the search. */
+    TPointOfInterestType iType;
+    /** The name, full or partial, of the place. */
+    CString iText;
     };
 
 }

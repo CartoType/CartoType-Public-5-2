@@ -684,7 +684,7 @@
             </condition>
         </layer>
     </scale>
-    <scale max='50000'>
+    <scale max='25000'>
         <layer name='building'>
             <scale max='6000'>
                 <shape border='lightgrey+black' borderWidth='0.5pt' fill='lightgrey+burlywood' height='yes' opacity='0.5'/>

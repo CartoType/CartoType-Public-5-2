@@ -14,14 +14,7 @@ class CFindTextDialog : public CDialog
     // Construction
     public:
         CFindTextDialog(CartoType::CFramework& aFramework,const CartoType::MString& aText,bool aPrefix,bool aFuzzy,CWnd* pParent = 0);
-
-        // Get the selected object if any and take ownership of it.
-        std::unique_ptr<CartoType::CMapObject> SelectedObject()
-            {
-            if (iSelectedObjectIndex >= 0 && iSelectedObjectIndex < iObjectArray.size())
-                return std::move(iObjectArray[iSelectedObjectIndex]);
-            return nullptr;
-            }
+        const CartoType::TFindParam& FindParam() const { return iFindParam; }
 
         // Dialog Data
         //{{AFX_DATA(CFindTextDialog)
@@ -34,6 +27,19 @@ class CFindTextDialog : public CDialog
         // Overrides
         // ClassWizard generated virtual function overrides
         //{{AFX_VIRTUAL(CFindTextDialog)
+
+        class TMatch
+            {
+            public:
+            bool operator==(const TMatch& aOther) const { return iKey == aOther.iKey && iValue == aOther.iValue; }
+            bool operator<(const TMatch& aOther) const { return iKey < aOther.iKey || (iKey == aOther.iKey && iValue < aOther.iValue); }
+
+            CartoType::CString iKey;
+            CartoType::CString iValue;
+            };
+
+        const TMatch& Match() const { return iMatch; }
+
     protected:
         virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
         virtual BOOL OnInitDialog();
@@ -42,16 +48,17 @@ class CFindTextDialog : public CDialog
         // Implementation
     protected:
         afx_msg void OnEditChange();
-        afx_msg void OnGeocode();
         afx_msg void OnComboBoxDoubleClick();
+        afx_msg void OnComboBoxSelChange();
         DECLARE_MESSAGE_MAP()
 
     private:
         void PopulateComboBox();
+        void UpdateMatch();
 
         CartoType::CFramework& iFramework;
-        CartoType::CMapObjectArray iObjectArray;
-        int iSelectedObjectIndex;
+        std::vector<TMatch> iMatchArray;
+        TMatch iMatch;
         CartoType::TFindParam iFindParam;
     };
 

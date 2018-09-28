@@ -60,85 +60,170 @@ optimised for the cases of 0...N elements in the array.
 template<class T,size_t N> class CSmallArray
     {
     public:
+    CSmallArray() { }
+    
     ~CSmallArray()
         {
-        if (iElements > N)
-            delete iData.iPointer;
+        if (m_vector_or_count && !(size_t(m_vector_or_count) & 1))
+            delete m_vector_or_count;
+        }
+
+    CSmallArray(const CSmallArray& aOther)
+        {
+        if (this != &aOther)
+            {
+            auto p = aOther.begin();
+            auto q = aOther.end();
+            while (p < q)
+                Append(*p++);
+            }
         }
     
+    CSmallArray(CSmallArray&& aOther)
+        {
+        if (this != &aOther)
+            {
+            m_vector_or_count = aOther.m_vector_or_count;
+            for (size_t i = 0; i < N; i++)
+                m_value[i] = std::move(aOther.m_value[i]);
+            aOther.m_vector_or_count = nullptr;
+            }
+        }
+    
+    CSmallArray& operator=(const CSmallArray& aOther)
+        {
+        if (this != &aOther)
+            {
+            Clear();
+            auto p = aOther.begin();
+            auto q = aOther.end();
+            while (p < q)
+                Append(*p++);
+            }
+        return *this;
+        }
+    
+    CSmallArray& operator=(CSmallArray&& aOther)
+        {
+        if (this != &aOther)
+            {
+            Clear();
+            m_vector_or_count = aOther.m_vector_or_count;
+            for (size_t i = 0; i < N; i++)
+                m_value[i] = std::move(aOther.m_value[i]);
+            aOther.m_vector_or_count = nullptr;
+            }
+        return *this;
+        }
+
     /** Delete all the elements. */
     void Clear()
         {
-        if (iElements > N)
-            delete iData.iPointer;
-        iElements = 0;
+        if (m_vector_or_count && !(size_t(m_vector_or_count) & 1))
+            delete m_vector_or_count;
+        m_vector_or_count = nullptr;
         }
 
     /** Return the number of elements. */
-    size_t Count() const { return iElements; }
+    size_t Count() const
+        {
+        if (!m_vector_or_count)
+            return 0;
+        if (size_t(m_vector_or_count) & 1)
+            return size_t(m_vector_or_count) >> 1;
+        return m_vector_or_count->size();
+        }
     /** Return a writable pointer to the underlying C++ array of elements. */
-    T* Data() { return iElements <= N ? iData.iValue : iData.iPointer->data(); }
+    T* Data()
+        {
+        if (!m_vector_or_count)
+            return nullptr;
+        if (size_t(m_vector_or_count) & 1)
+            return m_value;
+        return m_vector_or_count->data();
+        }
     /** Return a read-only pointer to the underlying C++ array of elements. */
-    const T* Data() const { return iElements <= N ? iData.iValue : iData.iPointer->data(); }
+    const T* Data() const
+        {
+        if (!m_vector_or_count)
+            return nullptr;
+        if (size_t(m_vector_or_count) & 1)
+            return m_value;
+        return m_vector_or_count->data();
+        }
     /** The writable array index operator, allowing the array to be treated like a C++ array. */
-    T& operator[](size_t aIndex) { assert(aIndex < iElements); return Data()[aIndex]; }
+    T& operator[](size_t aIndex) { assert(aIndex < Count()); return Data()[aIndex]; }
     /** The constant array index operator, allowing the array to be treated like a C++ array. */
-    const T& operator[](size_t aIndex) const { assert(aIndex < iElements); return Data()[aIndex]; }
+    const T& operator[](size_t aIndex) const { assert(aIndex < Count()); return Data()[aIndex]; }
     /** Append a single element. */
     void Append(T aElement)
         {
-        if (iElements < N)
-            iData.iValue[iElements++] = aElement;
+        size_t n = Count();
+        if (n < N)
+            {
+            m_value[n++] = aElement;
+            m_vector_or_count = (std::vector<T>*)(n * 2 + 1);
+            }
         else
             {
-            if (iElements == N)
+            if (n == N)
                 {
                 std::unique_ptr<std::vector<T>> v { new std::vector<T> };
                 for (size_t i = 0; i < N; i++)
-                    v->push_back(std::move(iData.iValue[i]));
-                iData.iPointer = v.release();
+                    v->push_back(std::move(m_value[i]));
+                m_vector_or_count = v.release();
                 }
 
-            iData.iPointer->push_back(aElement);
-            iElements++;
+            m_vector_or_count->push_back(aElement);
             }
         }
     
     /** Delete a single element. */
     void Delete(size_t aIndex)
         {
-        assert(aIndex < iElements);
-        iElements--;
-        if (iElements < N)
+        size_t n = Count();
+        assert(aIndex < n);
+        n--;
+        if (n < N)
             {
-            for (size_t i = aIndex; i < iElements; i++)
-                iData.iValue[i] = std::move(iData.iValue[i + 1]);
-            return;	        
+            for (size_t i = aIndex; i < n; i++)
+                m_value[i] = std::move(m_value[i + 1]);
+            m_vector_or_count = (std::vector<T>*)(n * 2 + 1);
+            return;
             }
-        iData.iPointer->erase(iData.iPointer->begin() + aIndex,iData.iPointer->begin() + aIndex + 1);
-        if (iElements == N)
+        m_vector_or_count->erase(m_vector_or_count->begin() + aIndex,m_vector_or_count->begin() + aIndex + 1);
+        if (n == N)
             {
-            std::vector<T>* v = iData.iPointer;
+            std::vector<T>* v = m_vector_or_count;
             for (size_t i = 0; i < N; i++)
-                iData.iValue[i] = std::move((*v)[i]);
+                m_value[i] = std::move((*v)[i]);
+            m_vector_or_count = (std::vector<T>*)(n * 2 + 1);
             delete v;
             }
         }
 
-    T* begin() { return iElements <= N ? iData.iValue : iData.iPointer->data(); }
-    const T* begin() const { return iElements <= N ? iData.iValue : iData.iPointer->data(); }
-    T* end() { return begin() + iElements; }
-    const T* end() const { return begin() + iElements; }
+    T* begin() { return Data(); }
+    const T* begin() const { return Data(); }
+    T* end()
+        {
+        if (!m_vector_or_count)
+            return nullptr;
+        if (size_t(m_vector_or_count) & 1)
+            return m_value + size_t(m_vector_or_count) / 2;
+        return m_vector_or_count->data() + m_vector_or_count->size();
+        }
+    const T* end() const
+        {
+        if (!m_vector_or_count)
+            return nullptr;
+        if (size_t(m_vector_or_count) & 1)
+            return m_value + size_t(m_vector_or_count) / 2;
+        return m_vector_or_count->data() + m_vector_or_count->size();
+        }
 
     private:
-    size_t iElements = 0;
-    union TData
-        {
-        TData() { }
-        T iValue[N]; 
-        std::vector<T>* iPointer;
-        };
-    TData iData;
+    T m_value[N];
+    std::vector<T>* m_vector_or_count = nullptr;
     };
 
 template<typename T> using CCompactArray = CSmallArray<T,1>;

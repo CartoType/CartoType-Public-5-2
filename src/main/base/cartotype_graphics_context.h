@@ -648,7 +648,7 @@ class TTextParam
     TFont object used to draw or measure the text, and thus
     allow rich text to be drawn.
     */
-    int32 iFonts = 0;
+    size_t iFonts = 0;
 
     /**
     A pointer to an array of fonts, to be selected

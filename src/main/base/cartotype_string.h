@@ -387,6 +387,7 @@ class MString
     void Append(uint16 aChar) { Append(&aChar,1); }
     /** Set the entire text to aChar. */
     void Set(uint16 aChar) { Replace(0,Length(),aChar); }
+    void Trim();
 
     /** The equality operator. */
     bool operator==(const MString& aString) const

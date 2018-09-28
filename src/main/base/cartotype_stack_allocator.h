@@ -1,6 +1,6 @@
 /*
 CARTOTYPE_STACK_ALLOCATOR.H
-Copyright (C) 2013-2017 CartoType Ltd.
+Copyright (C) 2013-2018 CartoType Ltd.
 See www.cartotype.com for more information.
 */
 
@@ -78,18 +78,26 @@ template<typename T> struct TStlStackAllocator
 
     using value_type = T;
     using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
     using propagate_on_container_copy_assignment = std::true_type;
     using propagate_on_container_move_assignment = std::true_type;
     using propagate_on_container_swap = std::true_type;
+    using is_always_equal = std::false_type;
 
-    explicit TStlStackAllocator(CStackAllocator& a): m_alloc(a) { }
+    TStlStackAllocator() { }
+    explicit TStlStackAllocator(CStackAllocator& a): m_alloc(&a) { }
 
+    template <typename U> struct rebind { typedef TStlStackAllocator<U> other; };
     template <typename U> TStlStackAllocator(TStlStackAllocator<U> const& aOther): m_alloc(aOther.m_alloc) { }
 
     pointer allocate(std::size_t n)
         {
-        return (pointer)(m_alloc.Alloc(n * sizeof(T)));
+        return (pointer)(m_alloc->Alloc(n * sizeof(T)));
         }
 
     void deallocate(pointer,std::size_t)
@@ -98,16 +106,16 @@ template<typename T> struct TStlStackAllocator
 
     template <typename U> bool operator==(TStlStackAllocator<U> const& aOther) const
         {
-        return &m_alloc == &aOther.m_alloc;
+        return m_alloc == aOther.m_alloc;
         }
 
     template <typename U> bool operator!=(TStlStackAllocator<U> const& aOther) const
         {
-        return &m_alloc != &aOther.m_alloc;
+        return m_alloc != aOther.m_alloc;
         }
 
     private:
-    CStackAllocator& m_alloc;
+    CStackAllocator* m_alloc = nullptr;
     };
 
 }

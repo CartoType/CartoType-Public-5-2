@@ -39,10 +39,14 @@ namespace CartoTypeDemo
 
             m_map_renderer = new CartoType.MapRenderer(m_framework, Handle);
             m_graphics_acceleration = m_map_renderer.Valid();
+            CreateLegend();
         }
 
         private CartoType.Framework m_framework;
         private CartoType.MapRenderer m_map_renderer;
+        private CartoType.Legend m_legend;
+        private bool m_draw_legend = false;
+        private bool m_metric_units = true;
         private bool m_graphics_acceleration = false;
         private bool m_map_drag_enabled;
         private int m_map_drag_offset_x;
@@ -57,10 +61,8 @@ namespace CartoTypeDemo
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            if (m_graphics_acceleration)
-                return;
-
-            Draw(e.Graphics);
+            if (!m_graphics_acceleration)
+                Draw(e.Graphics);
         }
 
         private void Draw(Graphics aGraphics)
@@ -80,6 +82,13 @@ namespace CartoTypeDemo
             }
 
             aGraphics.DrawImageUnscaled(m_framework.MapBitmap(), m_map_drag_offset_x, m_map_drag_offset_y);
+            
+            if (m_draw_legend && m_legend != null)
+            {
+                Bitmap legend_bitmap = m_legend.CreateLegend(1, "in", Math.Max(m_framework.ScaleDenominator(), 10000), m_framework.GetScaleDenominatorInView());
+                if (legend_bitmap != null)
+                    aGraphics.DrawImageUnscaled(legend_bitmap, 16, 16);
+            }
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -296,6 +305,50 @@ namespace CartoTypeDemo
                 m_framework.Resize(this.ClientSize.Width, this.ClientSize.Height);
                 Invalidate();
             }
+        }
+
+        private void CreateLegend()
+        {
+            m_legend = new CartoType.Legend(m_framework);
+            CartoType.Color text_color = new CartoType.Color(90,90,90);
+            m_legend.SetTextColor(text_color);
+            m_legend.SetAlignment(CartoType.Align.Center);
+            String dataset_name = m_framework.DataSetName();
+            //+ to do: set dataset name to title case
+            m_legend.SetFontSize(10, "pt");
+            m_legend.AddTextLine(dataset_name);
+
+            m_legend.SetAlignment(CartoType.Align.Right);
+            m_legend.SetFontSize(6, "pt");
+
+            String s = "";
+            CartoType.Util.SetAttribute(s, "ref", "M4");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "road/major", null, (int)CartoType.RoadType.Motorway, s, "motorway");
+            CartoType.Util.SetAttribute(s, "ref", "A40");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "road/major", null, (int)CartoType.RoadType.TrunkRoad, s, "trunk road");
+            CartoType.Util.SetAttribute(s, "ref", "A414");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "road/major", null, (int)CartoType.RoadType.PrimaryRoad, s, "primary road");
+            CartoType.Util.SetAttribute(s, "ref", "B4009");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "road/mid", null, (int)CartoType.RoadType.SecondaryRoad, s, "secondary road");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "road/mid", null, (int)CartoType.RoadType.TertiaryRoad, "High Street", "tertiary road");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "path", "cyc", 0, "", "cycleway");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "path", "bri", 0, "", "bridle path");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Line, "path", "foo", 0, "", "footpath");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Polygon, "land/major", "for", 0, "Ashridge", "forest or wood");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Polygon, "land/minor", "par", 0, "Green Park", "park, golf course or common");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Polygon, "land/minor", "gra", 0, "", "grassland");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Polygon, "land/minor", "orc", 0, "", "orchard, vineyard, etc.");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Polygon, "land/minor", "cmr", 0, "", "commercial or industrial");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Polygon, "land/minor", "cns", 0, "", "construction, quarry, landfill, etc.");
+            m_legend.AddMapObjectLine(CartoType.MapObjectType.Point, "amenity/minor", "stn", 0, "Berkhamsted", "station");
+
+            m_legend.SetAlignment(CartoType.Align.Center);
+            m_legend.AddScaleLine(m_metric_units);
+
+            CartoType.Color border_color = new CartoType.Color(CartoType.Color.KGray);
+            m_legend.SetBorder(border_color, 1, 4, "pt");
+            CartoType.Color background_color = new CartoType.Color(255,255,255,224);
+            m_legend.SetBackgroundColor(background_color);
         }
 
     }

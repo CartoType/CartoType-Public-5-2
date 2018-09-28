@@ -843,8 +843,13 @@ class MUserData
     virtual ~MUserData() { }
     };
 
-/** The maximum length for a map label in characters. */
-constexpr int32 KMaxLabelLength = 128;
+/**
+The maximum length for a map label in characters.
+The large size allows the use of complex multi-line labels.
+There has to be a fixed maximum length because of the fixed size
+of the glyph cache (see CEngine::EGlyphLogEntries).
+*/
+constexpr int32 KMaxLabelLength = 1024;
 
 /**
 A constant to convert radians to metres for the Mercator and other projections.

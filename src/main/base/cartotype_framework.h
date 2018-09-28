@@ -428,7 +428,7 @@ class CFramework: public MNavigatorObserver
     TResult CreateWritableMap(TWritableMapType aType,CString aFileName = nullptr);
     TResult SaveMap(uint32 aHandle,const CString& aFileName,TFileType aFileType);
     TResult ReadMap(uint32 aHandle,const CString& aFileName,TFileType aFileType);
-    TResult WriteMapImage(const CString& aFileName,TFileType aFileType);
+    TResult WriteMapImage(const CString& aFileName,TFileType aFileType,bool aCompress = false);
     bool MapIsEmpty(uint32 aHandle);
     size_t MapCount() const;
     uint32 MapHandle(size_t aIndex) const;

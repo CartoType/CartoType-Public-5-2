@@ -422,6 +422,9 @@ class CFramework: public MNavigatorObserver
     void License(const uint8* aKey,size_t aKeyLength);
     std::string Licensee() const;
     uint8 License() const;
+    CString Copyright() const;
+    void SetCopyrightNotice();
+    void SetCopyrightNotice(const CString& aCopyright);
     TResult Configure(const CString& aFilename);
     TResult LoadMap(const CString& aMapFileName,const std::string* aEncryptionKey = nullptr);
     TResult LoadMap(const TTileParam& aTileParam);

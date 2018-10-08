@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AF624B631EE56E5E0086B5BE /* standard.ctstyle in Resources */ = {isa = PBXBuildFile; fileRef = BF35B0691DEDD50E0016D835 /* standard.ctstyle */; };
-		BF35B06C1DEDD5910016D835 /* DejaVuSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BF35B06B1DEDD5910016D835 /* DejaVuSans.ttf */; };
 		BF35B06E1DEDD5AB0016D835 /* santa-cruz.ctm1 in Resources */ = {isa = PBXBuildFile; fileRef = BF35B06D1DEDD5AB0016D835 /* santa-cruz.ctm1 */; };
-		BF35B0701DEDD93B0016D835 /* CartoType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF35B06F1DEDD93A0016D835 /* CartoType.framework */; };
+		BF3A33E6216524E500D99379 /* standard.ctstyle in Resources */ = {isa = PBXBuildFile; fileRef = BF3A33E5216524E500D99379 /* standard.ctstyle */; };
+		BF3A33E82165250100D99379 /* DejaVuSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BF3A33E72165250100D99379 /* DejaVuSans.ttf */; };
+		BF3A33EA216525B400D99379 /* CartoType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3A33E9216525B400D99379 /* CartoType.framework */; };
 		BF728A0B1DE1CDC5003219F0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF728A0A1DE1CDC4003219F0 /* AppDelegate.swift */; };
 		BF728A0D1DE1CDC5003219F0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF728A0C1DE1CDC5003219F0 /* ViewController.swift */; };
 		BF728A101DE1CDC5003219F0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BF728A0E1DE1CDC5003219F0 /* Main.storyboard */; };
@@ -21,10 +21,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BF35B0691DEDD50E0016D835 /* standard.ctstyle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = standard.ctstyle; path = ../../style/standard.ctstyle; sourceTree = "<group>"; };
-		BF35B06B1DEDD5910016D835 /* DejaVuSans.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = DejaVuSans.ttf; path = ../../font/DejaVuSans.ttf; sourceTree = "<group>"; };
 		BF35B06D1DEDD5AB0016D835 /* santa-cruz.ctm1 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "santa-cruz.ctm1"; path = "../../test/data/ctm1/santa-cruz.ctm1"; sourceTree = "<group>"; };
-		BF35B06F1DEDD93A0016D835 /* CartoType.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CartoType.framework; sourceTree = "<group>"; };
+		BF3A33E5216524E500D99379 /* standard.ctstyle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = standard.ctstyle; path = ../../../style/standard.ctstyle; sourceTree = "<group>"; };
+		BF3A33E72165250100D99379 /* DejaVuSans.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = DejaVuSans.ttf; path = ../../../font/DejaVuSans.ttf; sourceTree = "<group>"; };
+		BF3A33E9216525B400D99379 /* CartoType.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CartoType.framework; sourceTree = "<group>"; };
 		BF728A071DE1CDC4003219F0 /* CartoTypeSwiftDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CartoTypeSwiftDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF728A0A1DE1CDC4003219F0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BF728A0C1DE1CDC5003219F0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -42,7 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF35B0701DEDD93B0016D835 /* CartoType.framework in Frameworks */,
+				BF3A33EA216525B400D99379 /* CartoType.framework in Frameworks */,
 				BFE6E6921DE3705C00ECF6EF /* libc++.1.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -53,9 +53,9 @@
 		BF35B0681DEDD4CA0016D835 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				BF3A33E72165250100D99379 /* DejaVuSans.ttf */,
+				BF3A33E5216524E500D99379 /* standard.ctstyle */,
 				BF35B06D1DEDD5AB0016D835 /* santa-cruz.ctm1 */,
-				BF35B06B1DEDD5910016D835 /* DejaVuSans.ttf */,
-				BF35B0691DEDD50E0016D835 /* standard.ctstyle */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -63,7 +63,7 @@
 		BF7289FE1DE1CDC3003219F0 = {
 			isa = PBXGroup;
 			children = (
-				BF35B06F1DEDD93A0016D835 /* CartoType.framework */,
+				BF3A33E9216525B400D99379 /* CartoType.framework */,
 				BFE6E6911DE3705C00ECF6EF /* libc++.1.tbd */,
 				BF728A091DE1CDC4003219F0 /* CartoTypeSwiftDemo */,
 				BF35B0681DEDD4CA0016D835 /* Resources */,
@@ -126,6 +126,7 @@
 				TargetAttributes = {
 					BF728A061DE1CDC4003219F0 = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = Q566457U5C;
 						LastSwiftMigration = 0830;
 					};
 				};
@@ -153,12 +154,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF35B06C1DEDD5910016D835 /* DejaVuSans.ttf in Resources */,
 				BF728A151DE1CDC5003219F0 /* LaunchScreen.storyboard in Resources */,
 				BF35B06E1DEDD5AB0016D835 /* santa-cruz.ctm1 in Resources */,
+				BF3A33E82165250100D99379 /* DejaVuSans.ttf in Resources */,
 				BF728A121DE1CDC5003219F0 /* Assets.xcassets in Resources */,
+				BF3A33E6216524E500D99379 /* standard.ctstyle in Resources */,
 				BF728A101DE1CDC5003219F0 /* Main.storyboard in Resources */,
-				AF624B631EE56E5E0086B5BE /* standard.ctstyle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,6 +295,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = Q566457U5C;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -313,6 +315,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = Q566457U5C;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

@@ -14,8 +14,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
+    {
         // Override point for customization after application launch.
+        self.window = UIWindow.init(frame: UIScreen.main.bounds)
+        let view = CartoTypeDemoView.init(frame: UIScreen.main.bounds)
+        
+        // Create the CartoType framework
+        let scale = UIScreen.main.scale;
+        let width = view.frame.size.width * scale
+        let height = view.frame.size.height * scale
+        let param = CartoTypeFrameworkParam()
+        param.mapFileName = "santa-cruz"
+        param.styleSheetFileName = "standard"
+        param.fontFileName = "DejaVuSans"
+        param.viewWidth = Int32(width)
+        param.viewHeight = Int32(height)
+        let framework = CartoTypeFramework.init(param: param)
+        view.setFramework(framework)
+        
+        let view_controller = ViewController.init(framework: framework)
+        view_controller.view = view
+        view_controller.viewDidLoad()
+        view_controller.preferredFramesPerSecond = 30;
+        self.window?.rootViewController = view_controller;
+        self.window?.backgroundColor = UIColor.white
+        self.window?.makeKeyAndVisible()
+
         return true
     }
 

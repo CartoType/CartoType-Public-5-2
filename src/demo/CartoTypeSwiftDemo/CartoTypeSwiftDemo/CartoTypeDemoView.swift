@@ -3,53 +3,48 @@
 //  CartoTypeSwiftDemo
 //
 //  Created by Graham Asher on 21/11/2016.
-//  Copyright © 2016 Graham Asher. All rights reserved.
+//  Copyright © 2016-2018 CartoType Ltd. All rights reserved.
 //
 
 import UIKit
+import GLKit
 
-class CartoTypeDemoView : UIView
+/** A view class for drawing maps using graphics acceleration. */
+class CartoTypeDemoView : GLKView
 {
-    var m_offset : CGPoint = CGPoint(x:0, y:0)
-    var m_scale : CGFloat = 1
-    var m_rotation : CGFloat = 0
-    var m_current_point : CGPoint = CGPoint(x:0, y:0)
-    var m_map_image : CGImage?
+    var m_framework : CartoTypeFramework?
+    var m_map_renderer : CartoTypeMapRenderer?
     
     override init(frame aFrame: CGRect)
     {
-        super.init(frame: aFrame)
+        let opengl_context = EAGLContext.init(api: EAGLRenderingAPI.openGLES2)
+        super.init(frame: aFrame, context:opengl_context!);
+        self.drawableDepthFormat = GLKViewDrawableDepthFormat.format24 // so that 3D buildings work
     }
     
     required init?(coder aDecoder: NSCoder)
     {
         super.init(coder: aDecoder)
+        self.context = EAGLContext.init(api: EAGLRenderingAPI.openGLES2)
+        self.drawableDepthFormat = GLKViewDrawableDepthFormat.format24 // so that 3D buildings work
+    }
+    
+    func setFramework(_ aFramework: CartoTypeFramework!)
+    {
+        m_framework = aFramework
+        m_map_renderer = nil;
     }
     
     override func draw(_ rect: CGRect)
     {
-        let c = UIGraphicsGetCurrentContext()
-        let h = bounds.size.height
+        if (m_map_renderer == nil && m_framework != nil)
+            {
+            m_map_renderer = CartoTypeMapRenderer.init(_: m_framework)
+            }
         
-        // Apply the transform representing current interactive panning, rotation and zooming.
-        if (m_scale != 1 || m_rotation != 0)
-        {
-            c?.translateBy(x: m_current_point.x,y: m_current_point.y)
-            c?.scaleBy(x: m_scale,y: m_scale)
-            c?.rotate(by: m_rotation)
-            c?.translateBy(x: -m_current_point.x,y: -m_current_point.y)
-        }
-        c?.translateBy(x: m_offset.x,y: m_offset.y)
-        
-        // Reflect the coordinate system vertically.
-        c?.scaleBy(x: 1,y: -1)
-        c?.translateBy(x: 0,y: -h)
-        
-        if (m_map_image != nil)
-        {
-            c?.draw(m_map_image!, in: rect)
-        }
+        if (m_map_renderer != nil)
+            {
+            m_map_renderer!.draw();
+            }
     }
 }
-
-
